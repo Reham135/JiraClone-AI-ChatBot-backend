@@ -1,0 +1,323 @@
+{
+  "name": "Jira Clone - AI Task Creator (Fixed Merge)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "b0c32817-f21d-46a9-b68d-6fc0893cf779",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -688,
+        16
+      ],
+      "webhookId": "chat-webhook"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"minLength\": 3,\n      \"maxLength\": 300,\n      \"description\": \"Short clear title of the task\"\n    },\n    \"description\": {\n      \"type\": [\"string\", \"null\"],\n      \"maxLength\": 2000,\n      \"description\": \"Detailed description if available\"\n    },\n    \"status\": {\n      \"type\": \"string\",\n      \"enum\": [\"ToDo\", \"InProgress\", \"Done\"],\n      \"description\": \"Task status, default to ToDo\"\n    },\n    \"priority\": {\n      \"type\": \"string\",\n      \"enum\": [\"Low\", \"Medium\", \"High\", \"Critical\"],\n      \"description\": \"Task priority\"\n    },\n    \"type\": {\n      \"type\": \"string\",\n      \"enum\": [\"Task\", \"Story\", \"Bug\"],\n      \"description\": \"Task type\"\n    },\n    \"projectId\": {\n      \"type\": \"number\",\n      \"description\": \"Project ID, always 1\"\n    }\n  },\n  \"required\": [\"title\", \"status\", \"priority\", \"type\", \"projectId\"]\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        400
+      ],
+      "id": "94b9cacb-1996-4c52-8766-ea4018950dd9",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a Jira task creation assistant. Extract task details from this message: \"{{ $json.message }}\"\n\nRules:\n- title: Clear, concise task title (required)\n- description: Detailed description, use the message content if not specific\n- status: Always \"ToDo\"\n- priority: Detect from keywords (high/urgent/critical → High, low → Low, default → Medium)\n- type: Detect from keywords (bug/fix/error → Bug, story/feature → Story, default → Task)\n- projectId: Always 1\n\nExamples:\n- \"Fix login bug\" → type: Bug, priority: High, title: \"Fix login bug\"\n- \"Create user profile feature\" → type: Story, priority: Medium, title: \"Create user profile feature\"\n- \"Update documentation\" → type: Task, priority: Medium, title: \"Update documentation\"\n\nReturn ONLY the structured JSON, no other text."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -64,
+        208
+      ],
+      "id": "48009303-de72-4f79-beef-9a6525a80fc3",
+      "name": "Analyze Task Message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5145/api/v1/auth/login",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"email\": \"reham.ahmed@goodsmartegypt.com\",\n  \"password\": \"Reham@2021\"\n}",
+        "options": {}
+      },
+      "id": "eb540c8d-e0a5-446c-a8cb-6f067a52633b",
+      "name": "Login to Get Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5145/api/v1/tasks",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": \"{{ $json.output.title }}\",\n  \"description\": \"{{ $json.output.description }}\",\n  \"status\": \"{{ $json.output.status}}\",\n  \"type\": \"{{ $json.type }}\",\n  \"priority\": \"{{$json.output.priority }}\",\n  \"projectId\": \"{{$json.output.projectId}}\"\n}",
+        "options": {}
+      },
+      "id": "5fb2e5b5-e29e-48d7-9c18-bf125443580e",
+      "name": "Create Task API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const createdTask = $input.item.json;\n\n// Format response for chatbot\nconst taskKey = createdTask.taskKey || `PROJ-${createdTask.id}`;\n\nreturn {\n  json: {\n    message: `✅ Task created successfully: ${taskKey} - ${createdTask.title}`,\n    taskCreated: {\n      id: createdTask.id.toString(),\n      taskKey: taskKey,\n      title: createdTask.title,\n      status: createdTask.status || 'ToDo'\n    }\n  }\n};"
+      },
+      "id": "732f4006-8bb6-4355-b269-4d7796b0a48e",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "9fd7edab-2e3b-4b0e-b07e-5ec9f13ad9fb",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Error handler\nconst error = $input.item.json.error || $input.item.json.message || 'Unknown error occurred';\n\nconsole.log('Error details:', error);\n\nreturn {\n  json: {\n    message: \"Sorry, I couldn't create the task. Please try again.\",\n    error: error\n  }\n};"
+      },
+      "id": "104c4eaa-f14b-41c3-ad05-9f64d772c487",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -688,
+        208
+      ],
+      "id": "8e66f8fe-da06-445a-b0cc-1535a7dc5949",
+      "name": "receive message",
+      "webhookId": "09511de5-a9a4-4385-a159-d5918abbc357",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        256,
+        48
+      ],
+      "id": "31f304d6-93ae-40a7-86a1-b27654d6daf9",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-chat-v3.1",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        400
+      ],
+      "id": "ac278d73-6c12-4950-9359-855287710877",
+      "name": "Mind",
+      "credentials": {
+        "openRouterApi": {
+          "id": "4mpJx8lU94QABVlc",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Analyze Task Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Login to Get Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Task Message": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Login to Get Token": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Task API": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Handler": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Analyze Task Message",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "receive message": {
+      "main": [
+        [
+          {
+            "node": "Login to Get Token",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Analyze Task Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Create Task API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mind": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Task Message",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0518404e-0f81-4d0e-8dbf-4ebb3fd64003",
+  "meta": {
+    "instanceId": "cbfed32393e6d130d4ebafca4d1f9a48389281e187bce0e52f6ec000c3880e9f"
+  },
+  "id": "87YkvkIJAf1ueJI4",
+  "tags": []
+}

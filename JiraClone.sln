@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraClone.API", "JiraClone.API\JiraClone.API.csproj", "{889B1FC3-2559-4590-B791-1A0BBA5994DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraClone.Domain", "JiraClone.Domain\JiraClone.Domain.csproj", "{501E955D-6E2E-43E8-9CA2-361694CE1E99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraClone.Application", "JiraClone.Application\JiraClone.Application.csproj", "{1D58CC98-0B4D-4AB8-BAC2-ADA825F48CDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraClone.Infrastructure", "JiraClone.Infrastructure\JiraClone.Infrastructure.csproj", "{3A02E1E0-0DCB-467D-A631-5512B32CEC82}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{889B1FC3-2559-4590-B791-1A0BBA5994DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{889B1FC3-2559-4590-B791-1A0BBA5994DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{889B1FC3-2559-4590-B791-1A0BBA5994DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{889B1FC3-2559-4590-B791-1A0BBA5994DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{501E955D-6E2E-43E8-9CA2-361694CE1E99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{501E955D-6E2E-43E8-9CA2-361694CE1E99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{501E955D-6E2E-43E8-9CA2-361694CE1E99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{501E955D-6E2E-43E8-9CA2-361694CE1E99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D58CC98-0B4D-4AB8-BAC2-ADA825F48CDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D58CC98-0B4D-4AB8-BAC2-ADA825F48CDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D58CC98-0B4D-4AB8-BAC2-ADA825F48CDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D58CC98-0B4D-4AB8-BAC2-ADA825F48CDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A02E1E0-0DCB-467D-A631-5512B32CEC82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A02E1E0-0DCB-467D-A631-5512B32CEC82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A02E1E0-0DCB-467D-A631-5512B32CEC82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A02E1E0-0DCB-467D-A631-5512B32CEC82}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

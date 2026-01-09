@@ -1,0 +1,10 @@
+using JiraClone.Application.DTOs.Auth;
+
+namespace JiraClone.Application.Interfaces;
+
+public interface IAuthService
+{
+    Task<AuthResponseDto?> RegisterAsync(RegisterRequestDto request);
+    Task<AuthResponseDto?> LoginAsync(LoginRequestDto request);
+    Task<UserDto?> GetCurrentUserAsync(string userId);
+}
